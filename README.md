@@ -54,4 +54,7 @@ Error Handling: Implement more robust error handling for various stages (e.g., f
 Standard Cryptography Library Usage: While a great learning exercise, for production-grade security, consider integrating established libraries like cryptography for symmetric encryption (e.g., AES in GCM mode, which includes authentication) and RSA operations.
 More Secure Seed Generation: While secrets is good, for extreme cases, consider hardware random number generators (if applicable).
 Securing the iteration in the Cipher.
+
+# summery
+i did this as my first project, i am aware of the weakness of the security and not optmised structure.  iwill use what i learned to make my next project better.
  
