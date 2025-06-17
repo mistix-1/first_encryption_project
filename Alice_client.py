@@ -4,7 +4,7 @@ import hmac
 import hashlib
 import secrets
 import random
-import threading # We'll use threading to allow concurrent input and message fetching
+import threading
 
 from encryption_code import (
     seedGenerator,
