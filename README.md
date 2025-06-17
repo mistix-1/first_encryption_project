@@ -1,6 +1,8 @@
 # Encrypted Messages
 This project demonstrates a custom encryption scheme combining a stream cipher with RSA for key exchange and HMAC-SHA256 for authenticated encryption (AEAD). It's designed to simulate communication where specific metadata (like iteration numbers) is transmitted in plaintext, alongside the encrypted content.
 
+# Educational only, not real world grade!!!
+
 # How It Works
 The system operates in several distinct steps to ensure secure and authenticated communication:
 
