@@ -3,6 +3,31 @@ This project demonstrates a custom encryption scheme combining a stream cipher w
 
 # Educational only, not real world grade!!!
 
+## Requirements & Installation
+
+### Requirements
+- Python 3.10 or higher  
+- Required Python packages:
+  - sympy
+  - cryptography
+  - requests
+  - flask
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/encrypted-messaging-app.git
+cd encrypted-messaging-app
+
+run on cmd:
+python chat_server.py
+python Alice_client.py
+python bob-client.py
+
+
+
+
 # How It Works
 The system operates in several distinct steps to ensure secure and authenticated communication:
 
