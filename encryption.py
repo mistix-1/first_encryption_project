@@ -216,7 +216,6 @@ def encrypt_message(message, seedGenerator, seed):
     # --- NEW: Generate HMAC-SHA256 Authentication Tag ---
     # Derive a consistent HMAC key from the shared seed.
     # We convert the integer seed to a string and then to bytes, as HMAC requires a bytes key.
-    # In a real system, you'd use a more robust Key Derivation Function (KDF) here.
     hmac_key = str(seed).encode('utf-8')
 
     # Calculate the HMAC-SHA256 of the encrypted payload using the derived key.
