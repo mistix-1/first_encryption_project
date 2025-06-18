@@ -1,6 +1,39 @@
 # Encrypted Messages
 This project demonstrates a custom encryption scheme combining a stream cipher with RSA for key exchange and HMAC-SHA256 for authenticated encryption (AEAD). It's designed to simulate communication where specific metadata (like iteration numbers) is transmitted in plaintext, alongside the encrypted content.
 
+# Educational only, not real world grade!!!
+
+# Goal:
+- Adding HTTPS
+- Adding file transfer system
+- Making the system usable via local wifi network
+
+
+## Requirements & Installation
+
+### Requirements
+- Python 3.10 or higher  
+- Required Python packages:
+  - sympy
+  - cryptography
+  - requests
+  - flask
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/encrypted-messaging-app.git
+cd encrypted-messaging-app
+
+run on cmd:
+python chat_server.py
+python Alice_client.py
+python bob-client.py
+
+
+
+
 # How It Works
 The system operates in several distinct steps to ensure secure and authenticated communication:
 
@@ -52,4 +85,7 @@ Error Handling: Implement more robust error handling for various stages (e.g., f
 Standard Cryptography Library Usage: While a great learning exercise, for production-grade security, consider integrating established libraries like cryptography for symmetric encryption (e.g., AES in GCM mode, which includes authentication) and RSA operations.
 More Secure Seed Generation: While secrets is good, for extreme cases, consider hardware random number generators (if applicable).
 Securing the iteration in the Cipher.
+
+# summery
+i did this as my first project, i am aware of the weakness of the security and not optmised structure.  iwill use what i learned to make my next project better.
  
