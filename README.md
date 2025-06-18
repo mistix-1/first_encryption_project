@@ -3,6 +3,12 @@ This project demonstrates a custom encryption scheme combining a stream cipher w
 
 # Educational only, not real world grade!!!
 
+# Goal:
+- Adding HTTPS
+- Adding file transfer system
+- Making the system usable via local wifi network
+
+
 ## Requirements & Installation
 
 ### Requirements
