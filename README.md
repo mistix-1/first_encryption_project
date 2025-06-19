@@ -8,7 +8,7 @@ This project demonstrates a custom encryption scheme combining a stream cipher w
 - Adding file transfer system
 - Making the system usable via local wifi network
 
-
+# changes! switched to AES-GCM, RSA-OAEP, AEAD and KDF.
 ## Requirements & Installation
 
 ### Requirements
