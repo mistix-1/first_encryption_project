@@ -1,91 +1,66 @@
-# Encrypted Messages
-This project demonstrates a custom encryption scheme combining a stream cipher with RSA for key exchange and HMAC-SHA256 for authenticated encryption (AEAD). It's designed to simulate communication where specific metadata (like iteration numbers) is transmitted in plaintext, alongside the encrypted content.
+# Encrypted Chat System (Educational Project)
+This repository contains a simple, yet illustrative, encrypted chat system designed for educational purposes. It demonstrates fundamental concepts of modern cryptography, including asymmetric (RSA) key exchange and symmetric (AES-GCM) message encryption, facilitated by a central server acting as a message broker.
 
-# Educational only, not real world grade!!!
+# This project is intended for learning and understanding cryptographic principles. It is NOT built for production use and lacks many security considerations vital for real-world applications (e.g., robust authentication, certificate pinning, persistent storage, advanced threat modeling, comprehensive error handling, etc.).
 
-# Goal:
-- Adding HTTPS
-- Adding file transfer system
-- Making the system usable via local wifi network
+# Learning Objectives
+Through this project, you can learn about:
 
-# changes! switched to AES-GCM, RSA-OAEP, AEAD and KDF.
-## Requirements & Installation
+Asymmetric Cryptography (RSA): How public and private key pairs are used for secure key exchange. Specifically, RSA with OAEP padding for securely transmitting a shared secret.
+Symmetric Cryptography (AES-GCM): How a shared secret key is used for efficient and authenticated encryption of messages. AES-GCM provides both confidentiality and integrity/authenticity.
+Key Derivation Functions (HKDF): The importance of deriving strong session keys from master secrets to ensure proper key usage and reduce potential vulnerabilities.
+Authenticated Encryption with Associated Data (AEAD): Understanding the role of Nonces (Initialization Vectors) and Authentication Tags, along with Associated Data (AAD), to protect against tampering, replay attacks, and to bind messages to specific contexts.
+Secure Communication Flow: Visualizing the steps involved in establishing a secure channel between two parties (Alice and Bob) over an insecure medium.
+Client-Server Architecture: How clients interact with a central server to facilitate message passing without the server needing to see plaintext.
+Base64 Encoding: Its utility in safely transmitting binary cryptographic data (keys, ciphertexts, nonces, tags) over text-
+based protocols like HTTP/JSON.
 
-### Requirements
-- Python 3.10 or higher  
-- Required Python packages:
-  - sympy
-  - cryptography
-  - requests
-  - flask
+# How it Works
+The system consists of three main components:
 
-### Installation
+server_chat.py (Local API Server):
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/encrypted-messaging-app.git
-cd encrypted-messaging-app
+Built with Flask, it acts as a minimalist message relay and a public key directory.
+It does not store or have access to the plaintext of any messages.
+Facilitates the key exchange by temporarily holding Bob's public RSA key and the encrypted master secret from Alice.
+Provides endpoints for clients to register public keys, send encrypted master secrets, and exchange encrypted chat messages.
+All cryptographic material (keys, ciphertexts, nonces, tags) sent to/from the server is Base64-encoded to be compatible with JSON.
+alice_client.py (Alice Client):
 
-run on cmd:
-python chat_server.py
-python Alice_client.py
-python bob-client.py
+Simulates Alice, one of the communicating parties.
+Initiates the secure communication by fetching Bob's public RSA key from the server.
+Generates a random master secret.
+Encrypts the master secret using Bob's public RSA key (OAEP padding) and sends it to the server for Bob.
+Derives a symmetric AES key from the master secret using HKDF.
+Encrypts her chat messages using AES-256 GCM with the shared AES key, a unique nonce, and includes a timestamp as Associated Data (AAD).
+Continuously polls the server for new messages from Bob and decrypts them using the shared AES key.
+bob_client.py (Bob Client):
 
+Simulates Bob, the other communicating party.
+Generates his own RSA key pair (public and private).
+Registers his public RSA key with the server.
+Polls the server until Alice's RSA-encrypted master secret is available.
+Decrypts the master secret using his private RSA key (OAEP padding).
+Derives a symmetric AES key from the master secret using HKDF (resulting in the same key as Alice).
+Encrypts his reply messages using AES-256 GCM with the shared AES key, a unique nonce, and includes a timestamp as Associated Data (AAD).
+Continuously polls the server for new messages from Alice and decrypts them using the shared AES key.
+encryption_code.py (Core Cryptography Module):
 
+Contains the fundamental cryptographic functions used by both clients.
+# RSA Operations:
+gen_rsa_keys(): Generates RSA public/private key pairs (4096-bit for strong security).
+rsa_encrypt(): Encrypts data using RSA with Optimal Asymmetric Encryption Padding (OAEP) for security against various attacks.
+rsa_decrypt(): Decrypts data using RSA with OAEP.
+Key Derivation:
+derive_symmetric_key(): Implements a Key Derivation Function (HKDF-SHA256) to derive a robust AES session key from the shared master secret. This is crucial for securely transforming a high-entropy secret into a key of the appropriate length for AES.
+AES-GCM (Authenticated Encryption with Associated Data):
+encrypt_message_aes_gcm(): Encrypts messages using AES-256 in Galois/Counter Mode (GCM). It generates a unique nonce and an authentication tag, and supports Associated Data (AAD) for binding unencrypted metadata to the ciphertext.
+decrypt_message_aes_gcm(): Decrypts AES-GCM messages and, critically, verifies the authentication tag and associated data to ensure the message's integrity and authenticity. A failure in this step indicates tampering.
 
+# Setup and Running
+Prerequisites
+Python 3.7+
+requests library (pip install requests)
+Flask library (pip install Flask)
+cryptography library (pip install cryptography)
 
-# How It Works
-The system operates in several distinct steps to ensure secure and authenticated communication:
-
-# Step 1: Secure Seed Exchange (RSA)
-Seed Generation: A large, cryptographically secure random seed is generated by Alice (the sender) using Python's secrets module. This seed acts as the foundational shared secret for the stream cipher.
-Key Generation: Bob (the receiver) generates his asymmetric RSA public and private key pair.
-Encrypted Exchange: Alice encrypts her generated seed using Bob's RSA public key.
-Decryption & Verification: Alice sends the encrypted seed to Bob. Bob decrypts the seed using his RSA private key. Both parties verify that the decrypted seed matches the original, establishing a shared secret for symmetric encryption.
-
-# Step 2: Message Encryption (Stream Cipher with Plaintext Iteration & HMAC)
-Once the shared seed is established, Alice encrypts her message. The final transmitted payload includes both encrypted content and plaintext metadata.
-
-Iteration Number Generation: Alice generates a random iteration number using secrets. This number determines how many times the seed generation process will repeat to produce the key stream. This iteration number will be transmitted in plaintext alongside the encrypted message.
-Key Stream Generation: The seedGenerator's iteration function takes the initial shared seed and the generated plaintext iteration number. It processes the seed (iteration times, by taking middle digits and squaring) to produce a complex, pseudo-random key stream number.
-Binary Conversion (Internal):
-The original plaintext message is converted into its binary representation.
-The original length of the message (in bits) is converted into a fixed-size 16-bit binary string.
-Content for Encryption: The 16-bit binary length is concatenated with the message binary: [16-bit Length] + [Message Binary].
-XOR Encryption: This combined block (length + message binary) is then XORed with the generated key stream binary. This produces the encrypted content.
-Final Transmitted Payload Structure: The encrypted content is then concatenated with the plaintext 16-bit binary representation of the iteration number.
-Transmitted Structure: [Encrypted (Length + Message)] + [Plaintext (16-bit Iteration)]
-ASCII Conversion: This entire binary payload is converted into an ASCII string for transmission.
-HMAC-SHA256 Tag: An HMAC-SHA256 authentication tag is generated. This tag is calculated over the entire ASCII payload (which includes both encrypted and plaintext parts) using a key derived from the shared seed. This provides message integrity and authenticity, ensuring the entire transmitted message hasn't been tampered with and comes from a legitimate source.
-Output: Alice sends the ASCII payload and the HMAC tag to Bob.
-
-# Step 3: Message Decryption (Stream Cipher with Metadata Extraction & HMAC Verification)
-Upon receiving the encrypted message, Bob performs the following steps:
-
-Extract Plaintext Iteration: Bob first extracts the last 16 bits from the received ASCII payload, converting them back to get the plaintext iteration number.
-HMAC Verification: Bob derives the same HMAC key from his shared seed. He then recalculates the HMAC-SHA256 tag using the entire received ASCII payload. He compares his recalculated tag with the received tag using hmac.compare_digest() for a secure comparison.
-If tags do not match, the message is rejected as potentially tampered with or forged.
-If tags match, message integrity and authenticity are confirmed, and decryption proceeds.
-Key Stream Re-generation: Using his shared seed and the extracted plaintext iteration number, Bob re-generates the exact same key stream that Alice used.
-XOR Decryption: Bob takes the encrypted portion of the received payload (everything before the plaintext iteration) and XORs it with the re-generated key stream. This recovers the original [16-bit Length] + [Message Binary] block.
-Metadata Extraction: The first 16 bits of this decrypted block are parsed to get the original message length.
-Message Extraction & Conversion: The remaining part of the decrypted block is the message binary. It's trimmed to the original length and converted back into human-readable text.
-
-# Technical Details
-RSA Key Size: Primes p and q are 514 bits, resulting in an RSA modulus N of approximately 1028 bits.
-Stream Cipher Basis: A custom stream cipher based on squaring middle digits of a seed.
-Authentication: HMAC-SHA256 provides message integrity and authenticity for the entire transmitted package.
-Metadata Handling: Message length is encrypted and embedded, while the iteration number is transmitted in plaintext as a fixed-size trailing header.
-
-
-# Future Enhancements
-Stronger Key Derivation: Replace str(seed).encode() with a proper Key Derivation Function (KDF) like HKDF for the HMAC key.
-Initialization Vector (IV): Consider how an IV could be integrated to enhance security, especially for encrypting multiple messages with the same shared key, even with a plaintext iteration.
-Error Handling: Implement more robust error handling for various stages (e.g., failed prime generation, decryption errors).
-Standard Cryptography Library Usage: While a great learning exercise, for production-grade security, consider integrating established libraries like cryptography for symmetric encryption (e.g., AES in GCM mode, which includes authentication) and RSA operations.
-More Secure Seed Generation: While secrets is good, for extreme cases, consider hardware random number generators (if applicable).
-Securing the iteration in the Cipher.
-
-# summery
-i did this as my first project, i am aware of the weakness of the security and not optmised structure.  iwill use what i learned to make my next project better.
- 
